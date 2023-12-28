@@ -2,8 +2,8 @@
 // created 12/28/2023 by Honkyrot
 
 // size of the canvas variables
-let size_x = 32;
-let size_y = 18;
+let size_x = 64;
+let size_y = 36;
 
 // ids
 let pixel_canvas = document.getElementById("pixel_canvas");
@@ -32,10 +32,8 @@ function populate_canvas() {
         var new_id = i;
         pixel.setAttribute("id", "pixel" + new_id);
         pixel.setAttribute("class", "pixel");
-        pixel.setAttribute("dragable", "true");
+        pixel.setAttribute("dragable", "false");
         pixel.classList.add("pixel");
-
-        pixel.addEventListener("scroll", test());
 
         pixel.style.width = size_x_calc + "px";
         pixel.style.height = size_y_calc + "px";
@@ -46,9 +44,55 @@ function populate_canvas() {
         // rgb test color
         //pixel.style.backgroundColor = "rgb(" + i * 10 + ", " + ii * 10 + ", " + i * ii + ")";
         pixel.style.backgroundColor = active_color;
+        pixel.setAttribute("hsl_color", active_color);
         assigned_pixel = pixel;
         pixel_canvas.appendChild(pixel);
     }
+}
+
+// create the color wheel for dragging
+function create_color_wheel() {
+    var color_wheel = document.createElement("img");
+    color_wheel.src = "media/color_wheel_hsl.png";
+    color_wheel.setAttribute("id", "color_wheel");
+    color_wheel.setAttribute("class", "color_wheel");
+    color_wheel.setAttribute("draggable", "false");
+    color_wheel.classList.add("color_wheel");
+
+    var mouse_position_array = last_mouse_pos.split(", ");
+
+    color_wheel.style.top = mouse_position_array[1] + "px";
+    color_wheel.style.left = mouse_position_array[0] + "px";
+    color_wheel.style.transform = "translate(-50%, -50%)";
+
+    document.body.appendChild(color_wheel);
+
+    setTimeout(() => {
+        color_wheel.style.opacity = "1";
+    }, 100);
+}
+
+// destroy the color wheel once finished dragging
+function destroy_color_wheel() {
+    var color_wheel = document.getElementById("color_wheel");
+    color_wheel.parentNode.removeChild(color_wheel);
+}
+
+// update color wheel based on mouse distance from center
+function update_color_wheel_size(e) {
+    var color_wheel = document.getElementById("color_wheel");
+    var last_mouse_pos_array = last_mouse_pos.split(", ");
+
+    var mouse_position_array = (e.clientX + ", " + e.clientY).split(", ");
+
+    var distance = Math.sqrt(Math.pow(mouse_position_array[0] - last_mouse_pos_array[0], 2) + Math.pow(mouse_position_array[1] - last_mouse_pos_array[1], 2));
+
+    var size = Math.min(Math.max(distance * 2, 100), 500);  // clamp between 100px and 500px
+
+    color_wheel.style.width = size + "px";
+    color_wheel.style.height = size + "px";
+
+    //console.log(distance);
 }
 
 // mouse events for dragging color
@@ -60,6 +104,7 @@ document.addEventListener("mousedown", function(e) {
 
     if (currently_dragging == false) {
         currently_dragging = true;
+        create_color_wheel();
     }
 });
 
@@ -67,12 +112,15 @@ document.addEventListener("mousedown", function(e) {
 document.addEventListener("mousemove", function(e) {
     if (currently_dragging == true) {
         change_color_mouse(e);
+        update_color_wheel_size(e);
+
     }
 });
 
 // mouse up event
 document.addEventListener("mouseup", function(e) {
     currently_dragging = false;
+    destroy_color_wheel();
     change_color_mouse(e);
     //console.log("mouse up");
 });
@@ -92,10 +140,6 @@ document.addEventListener('wheel', function(e) {
     assigned_pixel.style.backgroundColor = hsl_color_array.join(", ");
     assigned_pixel.setAttribute("hsl_color", hsl_color_array.join(", "));
 });
-
-function test() {
-    console.log("test");
-}
 
 function change_color_mouse(e) {
     var mouse_position = e.clientX + ", " + e.clientY;
