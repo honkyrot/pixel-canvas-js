@@ -1,0 +1,15 @@
+body {
+    margin: 0px;
+    background-color: black;
+}
+
+/* the PIXEL class */
+.pixel {
+    padding: 0px;
+    position: fixed;
+}
+
+/* on hover */
+.pixel:hover {
+    cursor: crosshair;
+}
