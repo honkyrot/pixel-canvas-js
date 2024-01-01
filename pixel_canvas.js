@@ -10,7 +10,8 @@ let size_x = 64;
 let size_y = 36;
 
 // ids
-let pixel_canvas = document.getElementById("pixel_canvas");
+const pixel_canvas = document.getElementById("pixel_canvas");
+const startup_screen = document.getElementById("startup_screen");
 
 // active variables
 let active_color = "hsl(0, 0%, 0%)"
@@ -18,6 +19,7 @@ let last_mouse_pos = null;
 let assigned_pixel = null;
 let currently_dragging = false;
 let color_snap = false;
+let outlined_pixels = false;
 
 // configure the size ratio of size_x and size_y
 function configure_size_ratio(x, y) {
@@ -117,6 +119,31 @@ function update_color_wheel(event) {
     //console.log(distance);
 }
 
+// reset the canvas to black
+function reset_canvas() {
+    var pixels = document.getElementsByClassName("pixel");
+
+    for (var i = 0; i < pixels.length; i++) {
+        pixels[i].style.backgroundColor = "hsl(0, 0%, 0%)";
+        pixels[i].setAttribute("hsl_color", "hsl(0, 0%, 0%)");
+    }
+}
+
+// outline pixels
+function outline_pixels() {
+    var pixels = document.getElementsByClassName("pixel");
+
+    for (var i = 0; i < pixels.length; i++) {
+        if (outlined_pixels) {
+            pixels[i].style.border = "none";
+        } else {
+            pixels[i].style.border = "1px solid white";
+        }
+    }
+
+    outlined_pixels = !outlined_pixels;
+}
+
 // mouse events for dragging color
 // on mouse down, assign pixel to variable assigned_pixel
 document.addEventListener("mousedown", function(event) {
@@ -181,8 +208,20 @@ document.addEventListener("touchstart", function(event) {
 
 // if user press left shift, snap to color wheel
 window.addEventListener("keydown", function(event) {
-    if (event.key === "Shift") {
-        color_snap = true;
+    switch (event.key) {
+        case "Shift":
+            // color snapping
+            color_snap = true;
+            break;
+        case "Escape":
+            // reset canvas
+            reset_canvas();
+            break;
+        case " ":
+            // make pixels outlined on space
+            outline_pixels();
+        default:
+            break;
     }
 });
 
@@ -225,3 +264,11 @@ window.mobileCheck = function() {
 };
 
 window.mobileCheck();
+
+// hide startuo screen
+setTimeout(() => {
+    startup_screen.style.opacity = "0";
+    setTimeout(() => {
+        startup_screen.style.display = "none";
+    }, 1000);
+}, 10000);
